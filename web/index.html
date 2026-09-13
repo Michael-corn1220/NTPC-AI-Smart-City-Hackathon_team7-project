@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新北市政府法制局 — AI 輔助訴願案件審理系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#0E2436; --navy-800:#153A5B; --navy-700:#1E4F78; --navy-600:#2C6494;
+    --navy-100:#E7EEF5; --gray-50:#F4F5F7; --gray-100:#EAECEF; --gray-200:#DDE1E6;
+    --gray-300:#C7CDD4; --gray-500:#7C8896; --gray-600:#5B6572; --ink:#161D26; --white:#FFFFFF;
+    --green:#2E7D63; --green-100:#E5F1EC; --amber:#A8710B; --amber-100:#FBF0DC;
+    --red:#B23A3A; --red-100:#FBEAEA;
+    --radius-sm:4px; --radius-md:6px;
+    --shadow-1:0 1px 2px rgba(14,36,54,0.06); --shadow-2:0 6px 20px rgba(14,36,54,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--gray-50);-webkit-font-smoothing:antialiased;}
+  .mono{font-family:"IBM Plex Mono","Noto Sans TC",monospace;}
+  .topbar{height:56px;background:var(--navy-900);color:var(--white);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:50;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--navy-600),var(--navy-800));display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .brand-text{line-height:1.25;}
+  .brand-text .org{font-size:11px;color:#AFC2D6;letter-spacing:0.5px;}
+  .brand-text .sys{font-size:15px;font-weight:700;}
+  .topbar-status{display:flex;align-items:center;gap:8px;font-size:11.5px;color:#B9C9D9;}
+  .status-dot{width:6px;height:6px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 3px rgba(74,222,128,0.18);}
+  .assist-note{background:var(--navy-800);color:#CFE0F0;font-size:11.5px;text-align:center;padding:6px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+  .assist-note b{color:#fff;font-weight:600;}
+  .app-shell{max-width:1180px;margin:0 auto;padding:28px 32px 60px;}
+  .step-indicator{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px;}
+  .step-pill{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--gray-500);padding:6px 14px;border-radius:20px;background:var(--white);border:1px solid var(--gray-200);}
+  .step-pill .num{width:18px;height:18px;border-radius:50%;background:var(--gray-200);color:var(--white);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .step-pill.active{background:var(--navy-800);border-color:var(--navy-800);color:#fff;font-weight:600;}
+  .step-pill.active .num{background:#fff;color:var(--navy-800);}
+  .step-pill.done{color:var(--navy-700);}
+  .step-pill.done .num{background:var(--green);}
+  .step-connector{width:28px;height:1px;background:var(--gray-300);}
+  .screen{background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:28px 30px 30px;}
+  .pane-eyebrow{font-size:12px;color:var(--gray-500);margin:0 0 4px;}
+  .pane-title{font-size:19px;font-weight:700;margin:0 0 18px;color:var(--navy-900);}
+  .back-btn{display:inline-flex;align-items:center;gap:6px;border:none;background:none;color:var(--navy-700);font-size:13px;font-weight:500;cursor:pointer;padding:0 0 16px;}
+  .back-btn:hover{text-decoration:underline;}
+  .field-group{margin-bottom:16px;}
+  .field-row{display:flex;gap:14px;margin-bottom:16px;}
+  .field-row .field-group{flex:1;margin-bottom:0;}
+  label{display:block;font-size:13px;font-weight:500;color:var(--navy-800);margin-bottom:6px;}
+  .label-hint{font-weight:400;color:var(--gray-500);font-size:11.5px;}
+  select, input[type=text], textarea{width:100%;border:1px solid var(--gray-300);border-radius:var(--radius-sm);padding:9px 12px;font-size:14px;font-family:inherit;color:var(--ink);background:var(--white);transition:border-color .15s ease, box-shadow .15s ease;}
+  select:focus, input[type=text]:focus, textarea:focus{outline:none;border-color:var(--navy-600);box-shadow:0 0 0 3px rgba(44,100,148,0.15);}
+  input.mono{font-size:13.5px;}
+  select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%235B6572' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+  .party-block{border:1px solid var(--gray-200);border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;}
+  .party-tabs{display:flex;background:var(--gray-100);}
+  .party-tab{flex:1;border:none;background:transparent;padding:10px 8px;font-size:13px;font-weight:500;color:var(--gray-600);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;border-bottom:2px solid transparent;transition:background .15s ease,color .15s ease,border-color .15s ease;}
+  .party-tab.active{background:var(--white);color:var(--navy-900);border-bottom-color:var(--navy-700);font-weight:700;}
+  .party-tag{font-size:10px;padding:1px 6px;border-radius:8px;}
+  .party-tag.people{background:var(--navy-100);color:var(--navy-700);}
+  .party-tag.agency{background:var(--amber-100);color:var(--amber);}
+  .party-panel{display:none;padding:14px;}
+  .party-panel.active{display:block;}
+  textarea{min-height:130px;resize:vertical;line-height:1.6;font-size:13px;}
+  .char-count{font-size:11px;color:var(--gray-500);text-align:right;margin-top:4px;}
+  .run-btn{margin-top:22px;width:100%;border:none;border-radius:var(--radius-md);background:var(--navy-800);color:var(--white);font-size:15px;font-weight:700;padding:14px 18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s ease, transform .1s ease;}
+  .run-btn:hover{background:var(--navy-700);}
+  .run-btn:active{transform:translateY(1px);}
+  .run-btn:disabled{background:var(--gray-300);color:var(--gray-600);cursor:not-allowed;}
+  .run-btn .spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;animation:spin .8s linear infinite;display:none;}
+  .run-btn.loading .spin{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .run-sub{font-size:11px;color:var(--gray-500);text-align:center;margin-top:8px;}
+  .stage-progress{margin-top:14px;display:none;}
+  .stage-progress.show{display:block;}
+  .stage-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray-500);padding:4px 0;}
+  .stage-item .st-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--gray-300);flex-shrink:0;}
+  .stage-item.done .st-dot{background:var(--green);border-color:var(--green);}
+  .stage-item.active{color:var(--navy-800);font-weight:600;}
+  .stage-item.active .st-dot{border-color:var(--navy-600);border-top-color:transparent;animation:spin .8s linear infinite;}
+  .right-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+  .export-actions{display:flex;gap:8px;}
+  .btn-ghost{border:1px solid var(--gray-300);background:var(--white);color:var(--navy-800);font-size:12.5px;font-weight:500;padding:8px 12px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:6px;transition:border-color .15s ease, background .15s ease;}
+  .btn-ghost:hover{border-color:var(--navy-600);background:var(--navy-100);}
+  .btn-ghost:disabled{color:var(--gray-300);border-color:var(--gray-200);cursor:not-allowed;background:var(--white);}
+  .tabs{display:flex;gap:2px;background:var(--gray-100);border-radius:var(--radius-md);padding:3px;margin-bottom:14px;}
+  .tab-btn{flex:1;border:none;background:transparent;padding:9px 4px;font-size:12px;font-weight:500;color:var(--gray-600);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s ease, color .15s ease;white-space:nowrap;}
+  .tab-btn.active{background:var(--white);color:var(--navy-900);box-shadow:var(--shadow-1);font-weight:700;}
+  .panel-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-md);display:flex;flex-direction:column;overflow:hidden;}
+  .tab-panel{display:none;padding:20px;}
+  .tab-panel.active{display:flex;flex-direction:column;}
+  .empty-state{margin:30px auto;text-align:center;color:var(--gray-500);max-width:280px;}
+  .empty-state .ic{font-size:26px;margin-bottom:10px;}
+  .empty-state .t1{font-size:13.5px;font-weight:500;color:var(--gray-600);margin-bottom:4px;}
+  .empty-state .t2{font-size:12px;line-height:1.6;}
+  .json-view{font-family:"IBM Plex Mono",monospace;font-size:12px;line-height:1.8;color:#2A3644;white-space:pre-wrap;background:var(--gray-50);border-radius:var(--radius-sm);padding:12px;}
+  .field-card{border:1px solid var(--gray-200);border-radius:var(--radius-md);background:var(--white);padding:14px 16px 6px;margin-bottom:12px;}
+  .field-card-title{font-size:12px;font-weight:700;color:var(--navy-800);margin-bottom:8px;}
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;}
+  .field-item{margin-bottom:10px;}
+  .field-item.full{grid-column:1 / -1;}
+  .field-label{font-size:11px;color:var(--gray-500);margin-bottom:3px;}
+  .field-value{font-size:13px;color:var(--ink);line-height:1.6;}
+  .field-list{margin:2px 0 0;padding-left:18px;font-size:12.5px;color:var(--ink);line-height:1.8;}
+  .field-tag{display:inline-block;font-size:11.5px;font-weight:600;background:var(--navy-100);color:var(--navy-700);padding:2px 9px;border-radius:10px;}
+  .reg-card{border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;background:var(--white);}
+  .reg-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+  .reg-name{font-size:13.5px;font-weight:700;color:var(--navy-900);}
+  .reg-badge{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+  .reg-badge.ok{background:var(--green-100);color:var(--green);}
+  .reg-badge.warn{background:var(--amber-100);color:var(--amber);}
+  .reg-body{font-size:12.5px;color:var(--gray-600);line-height:1.7;}
+  .reg-source{font-size:11px;color:var(--gray-500);margin-top:6px;font-family:"IBM Plex Mono",monospace;}
+  .case-card{border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;}
+  .case-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+  .case-no{font-size:12.5px;font-weight:700;color:var(--navy-900);font-family:"IBM Plex Mono",monospace;}
+  .case-result{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:10px;}
+  .case-result.revoke{background:var(--green-100);color:var(--green);}
+  .case-result.dismiss{background:var(--gray-100);color:var(--gray-600);}
+  .case-result.partial{background:var(--amber-100);color:var(--amber);}
+  .sim-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .sim-bar-track{flex:1;height:5px;background:var(--gray-100);border-radius:3px;overflow:hidden;}
+  .sim-bar-fill{height:100%;background:var(--navy-600);border-radius:3px;}
+  .sim-pct{font-size:11px;color:var(--gray-500);font-family:"IBM Plex Mono",monospace;width:34px;text-align:right;}
+  .case-line{font-size:12.5px;color:var(--gray-600);line-height:1.7;margin-bottom:3px;}
+  .case-line b{color:var(--navy-800);font-weight:600;}
+  .draft-doc{padding:6px 4px 4px;}
+  .draft-title{text-align:center;font-size:16px;font-weight:700;color:var(--navy-900);margin-bottom:4px;}
+  .draft-meta{text-align:center;font-size:11.5px;color:var(--gray-500);margin-bottom:16px;font-family:"IBM Plex Mono",monospace;}
+  .path-badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px;margin-bottom:14px;}
+  .path-badge.substantive{background:var(--navy-100);color:var(--navy-700);}
+  .path-badge.procedural{background:var(--amber-100);color:var(--amber);}
+  .draft-section{margin-bottom:16px;}
+  .draft-section h4{font-size:13px;color:var(--navy-800);border-left:3px solid var(--navy-700);padding-left:8px;margin:0 0 8px;}
+  .draft-body{font-size:13px;line-height:1.95;color:var(--ink);outline:none;border-radius:var(--radius-sm);padding:6px 8px;white-space:pre-wrap;transition:box-shadow .15s ease, background .15s ease;}
+  .draft-body:focus{background:var(--navy-100);box-shadow:0 0 0 2px var(--navy-600);}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:var(--navy-900);color:#fff;font-size:13px;padding:11px 20px;border-radius:24px;box-shadow:var(--shadow-2);opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:100;max-width:80vw;text-align:center;}
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+  .btn-perspective{border:1px solid var(--navy-600);background:var(--navy-100);color:var(--navy-800);font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:6px;transition:border-color .15s ease, background .15s ease;}
+  .btn-perspective:hover{background:#DCE7F2;}
+  .btn-perspective:disabled{color:var(--gray-300);border-color:var(--gray-200);cursor:not-allowed;background:var(--white);}
+  .modal-overlay{position:fixed;inset:0;background:rgba(14,36,54,0.55);display:none;align-items:center;justify-content:center;z-index:200;padding:24px;}
+  .modal-overlay.show{display:flex;}
+  .modal-box{background:var(--white);border-radius:10px;width:100%;max-width:1120px;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-2);overflow:hidden;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--navy-900);color:#fff;flex-shrink:0;}
+  .modal-head .mh-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .modal-head .mh-sub{font-size:11px;color:#AFC2D6;margin-top:2px;}
+  .modal-close{border:none;background:rgba(255,255,255,0.12);color:#fff;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .modal-close:hover{background:rgba(255,255,255,0.22);}
+  .modal-body{padding:18px 20px 20px;overflow-y:auto;}
+  .modal-loading{padding:40px 20px;text-align:center;color:var(--gray-500);font-size:13px;}
+  .modal-loading .spin{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--gray-200);border-top-color:var(--navy-600);margin:0 auto 14px;animation:spin .8s linear infinite;}
+
+  .pv-disclaimer{font-size:11.5px;color:var(--amber);background:var(--amber-100);border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:16px;line-height:1.6;}
+  .pv-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+  .pv-col{border:1px solid var(--gray-200);border-radius:var(--radius-md);padding:12px 13px;background:var(--gray-50);}
+  .pv-col-head{font-size:11.5px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+  .pv-col.people .pv-col-head{color:var(--navy-700);}
+  .pv-col.agency .pv-col-head{color:var(--amber);}
+  .pv-col-body{font-size:12.5px;line-height:1.75;color:var(--ink);}
+  .pv-section-title{font-size:12.5px;font-weight:700;color:var(--navy-800);margin:4px 0 10px;}
+  .pv-detail{border:1px solid var(--gray-200);border-left:3px solid var(--navy-600);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:10px 12px;margin-bottom:10px;background:var(--white);}
+  .pv-detail-text{font-size:12.5px;line-height:1.7;color:var(--ink);margin-bottom:6px;}
+  .pv-detail-meta{display:flex;gap:8px;flex-wrap:wrap;}
+  .pv-tag{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:9px;background:var(--navy-100);color:var(--navy-700);}
+  .pv-tag.agency{background:var(--amber-100);color:var(--amber);}
+  .pv-tag.both{background:var(--green-100);color:var(--green);}
+  .pv-tag.majority{background:var(--green-100);color:var(--green);}
+  .pv-tag.minority{background:var(--red-100);color:var(--red);}
+  .pv-ref{font-size:11px;color:var(--gray-500);font-family:"IBM Plex Mono",monospace;}
+  .pv-chat{margin-top:22px;border-top:1px solid var(--gray-200);padding-top:16px;}
+  .pv-chat-title{font-size:13px;font-weight:700;color:var(--navy-800);margin-bottom:4px;}
+  .pv-chat-desc{font-size:11.5px;color:var(--gray-500);margin-bottom:12px;line-height:1.6;}
+  .pv-chat-log{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;max-height:300px;overflow-y:auto;}
+  .pv-chat-log:empty{display:none;}
+  .pv-msg{max-width:85%;font-size:12.5px;line-height:1.7;padding:9px 12px;border-radius:var(--radius-md);white-space:pre-wrap;}
+  .pv-msg.user{align-self:flex-end;background:var(--navy-700);color:#fff;border-bottom-right-radius:2px;}
+  .pv-msg.ai{align-self:flex-start;background:var(--gray-50);border:1px solid var(--gray-200);color:var(--ink);border-bottom-left-radius:2px;}
+  .pv-chat-input-row{display:flex;gap:8px;align-items:flex-end;}
+  .pv-chat-input{flex:1;border:1px solid var(--gray-300);border-radius:var(--radius-md);padding:9px 12px;font-size:12.5px;font-family:inherit;resize:none;min-height:40px;max-height:100px;color:var(--ink);}
+  .pv-chat-input:focus{outline:none;border-color:var(--navy-600);}
+  .pv-chat-send{background:var(--navy-800);color:#fff;border:none;border-radius:var(--radius-md);padding:0 16px;height:40px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .pv-chat-send:hover{background:var(--navy-700);}
+  .pv-chat-send:disabled{background:var(--gray-300);cursor:not-allowed;}
+  .dropzone{border:1.5px dashed var(--gray-300);border-radius:var(--radius-md);background:var(--gray-50);padding:18px;text-align:center;cursor:pointer;transition:border-color .15s ease,background .15s ease;margin-bottom:10px;}
+  .dropzone:hover,.dropzone.drag{border-color:var(--navy-600);background:var(--navy-100);}
+  .dropzone .dz-icon{font-size:20px;margin-bottom:4px;}
+  .dropzone .dz-main{font-size:13px;color:var(--navy-800);font-weight:500;}
+  .dropzone .dz-main u{color:var(--navy-700);}
+  .dropzone .dz-sub{font-size:11.5px;color:var(--gray-500);margin-top:2px;}
+  .dropzone .dz-file{font-size:12px;color:var(--green);margin-top:8px;font-weight:600;}
+  .home-btn{border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s ease;}
+  .home-btn:hover{background:rgba(255,255,255,0.22);}
+  /* 通用 modal（法條全文 / 案例原文） */
+  .doc-modal-body{font-size:13px;line-height:1.9;color:var(--ink);white-space:pre-wrap;font-family:"Noto Sans TC",sans-serif;}
+  .reg-card.clickable, .case-card.clickable{cursor:pointer;transition:border-color .15s ease, box-shadow .15s ease;}
+  .reg-card.clickable:hover, .case-card.clickable:hover{border-color:var(--navy-600);box-shadow:var(--shadow-1);}
+  .click-hint{font-size:10.5px;color:var(--navy-600);margin-top:6px;}
+  .cite-notice{font-size:11.5px;color:var(--amber);background:var(--amber-100);border:1px solid #E9D3A0;border-radius:var(--radius-sm);padding:8px 12px;margin:12px 0;line-height:1.6;}
+  .cite-notice a{color:var(--navy-700);font-weight:600;}
+  .cite-notice b{color:var(--red);}
+  /* 草稿修訂對話框 */
+  .revise-box{border:1px solid var(--gray-200);background:var(--gray-50);border-radius:var(--radius-md);padding:14px;margin-top:18px;}
+  .revise-title{font-size:12.5px;font-weight:700;color:var(--navy-800);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .revise-row{display:flex;gap:8px;align-items:flex-end;}
+  .revise-row select{width:130px;flex:none;font-size:12.5px;padding:8px 10px;}
+  .revise-row input{flex:1;font-size:12.5px;padding:9px 12px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);}
+  .revise-row button{border:none;background:var(--navy-800);color:#fff;border-radius:var(--radius-sm);padding:0 18px;height:38px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .revise-row button:hover{background:var(--navy-700);}
+  .revise-row button:disabled{background:var(--gray-300);cursor:not-allowed;}
+  .revise-log{margin-top:10px;display:flex;flex-direction:column;gap:8px;}
+  .revise-msg{font-size:12px;line-height:1.7;padding:8px 12px;border-radius:var(--radius-md);}
+  .revise-msg.user{align-self:flex-end;background:var(--navy-700);color:#fff;max-width:80%;}
+  .revise-msg.ai{align-self:flex-start;background:#fff;border:1px solid var(--gray-200);max-width:90%;}
+  .revise-warn{font-size:11px;color:var(--amber);background:var(--amber-100);border-radius:var(--radius-sm);padding:6px 10px;margin-top:6px;}
+  .export-menu{position:relative;display:inline-block;}
+  .export-dropdown{position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-sm);box-shadow:var(--shadow-2);display:none;z-index:20;min-width:150px;overflow:hidden;}
+  .export-dropdown.show{display:block;}
+  .export-dropdown button{display:block;width:100%;text-align:left;border:none;background:#fff;padding:10px 14px;font-size:12.5px;color:var(--ink);cursor:pointer;}
+  .export-dropdown button:hover{background:var(--navy-100);}
+  @media (max-width:640px){.pv-columns{grid-template-columns:1fr;}.app-shell{padding:20px 14px 50px;}.screen{padding:20px 16px 24px;}}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:0.001ms !important;transition-duration:0.001ms !important;}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">⚖️</div>
+    <div class="brand-text">
+      <div class="org">NEW TAIPEI CITY GOVERNMENT · LEGAL AFFAIRS BUREAU</div>
+      <div class="sys">新北市政府法制局 — AI 輔助訴願案件審理系統</div>
+    </div>
+  </div>
+  <div class="topbar-status">
+    <button id="homeBtn" class="home-btn">🏠 回首頁</button>
+  </div>
+</div>
+<div class="assist-note">本系統為<b>承辦人員輔助工具</b>：所有 AI 產出之分類、法規建議與決定書草稿，均需經承辦人員檢視、修改並核定後始為正式文書。</div>
+
+<div class="app-shell">
+  <div class="step-indicator">
+    <div class="step-pill active" id="stepPill1"><span class="num">1</span> 輸入案件資料</div>
+    <div class="step-connector"></div>
+    <div class="step-pill" id="stepPill2"><span class="num">2</span> AI 解析結果</div>
+  </div>
+
+  <!-- SCREEN 1 -->
+  <div class="screen" id="screen-input">
+    <div class="pane-eyebrow">STEP 01 — 案件基本資料與雙方卷證輸入</div>
+    <div class="pane-title">案件資料輸入</div>
+    <input type="hidden" id="caseNo" value="">
+    <div class="field-group">
+      <label for="caseType">案件類別 <span class="label-hint">（可先選擇，或由 AI 於解析後自動確認）</span></label>
+      <select id="caseType">
+        <option value="">請選擇（或由 AI 判斷）</option>
+        <option>廢棄物清理法</option><option>洗錢防制法</option>
+        <option>空氣污染防制法</option><option>其他</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>雙方卷證文件 <span class="label-hint">（訴願書與答辯書均為必要輸入；可上傳檔案或直接貼上；黑客松環境僅使用合成／去識別化資料）</span></label>
+      <div class="party-block">
+        <div class="party-tabs">
+          <button class="party-tab active" data-party="people">訴願書 <span class="party-tag people">人民</span></button>
+          <button class="party-tab" data-party="agency">答辯書 <span class="party-tag agency">機關</span></button>
+        </div>
+        <div class="party-panel active" id="party-people">
+          <div class="dropzone" id="peopleDrop">
+            <input type="file" id="peopleFile" accept=".pdf,.txt,.md,.docx" style="display:none">
+            <div class="dz-icon">📎</div>
+            <div class="dz-main">拖曳檔案到此，或<u>點擊選擇檔案</u></div>
+            <div class="dz-sub">支援 PDF、TXT、DOCX（訴願書）</div>
+            <div class="dz-file" id="peopleFileName"></div>
+          </div>
+          <textarea id="peopleText" placeholder="或直接貼上訴願書全文（合成／去識別化資料）……"></textarea>
+          <div class="char-count" id="peopleCount">—</div>
+        </div>
+        <div class="party-panel" id="party-agency">
+          <div class="dropzone" id="agencyDrop">
+            <input type="file" id="agencyFile" accept=".pdf,.txt,.md,.docx" style="display:none">
+            <div class="dz-icon">📎</div>
+            <div class="dz-main">拖曳檔案到此，或<u>點擊選擇檔案</u></div>
+            <div class="dz-sub">支援 PDF、TXT、DOCX（答辯書）</div>
+            <div class="dz-file" id="agencyFileName"></div>
+          </div>
+          <textarea id="agencyText" placeholder="或直接貼上答辯書全文……"></textarea>
+          <div class="char-count" id="agencyCount">—</div>
+        </div>
+      </div>
+    </div>
+    <button class="run-btn" id="runBtn">
+      <span class="spin"></span>
+      <span id="runBtnLabel">開始處理</span>
+    </button>
+    <div class="stage-progress" id="stageProgress">
+      <div class="stage-item" data-stage="deid"><span class="st-dot"></span>個資去識別化（訴願書＋答辯書）</div>
+      <div class="stage-item" data-stage="extract"><span class="st-dot"></span>結構化擷取與案件分類</div>
+      <div class="stage-item" data-stage="retrieve"><span class="st-dot"></span>法規與相似案例檢索</div>
+      <div class="stage-item" data-stage="draft"><span class="st-dot"></span>決定書草稿生成</div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2 -->
+  <div class="screen" id="screen-result" style="display:none;">
+    <button class="back-btn" id="backBtn">← 返回修改案件資料</button>
+    <div class="right-head">
+      <div>
+        <div class="pane-eyebrow">STEP 02 — AI 智慧比對與草稿產出</div>
+        <div class="pane-title" style="margin-bottom:0;">審查結果檢視</div>
+      </div>
+      <div class="export-actions">
+        <button class="btn-perspective" id="perspectiveBtn" disabled>🔍 中立多元視角分析</button>
+        <div class="export-menu">
+          <button class="btn-ghost" id="exportBtn" disabled>📥 匯出檔案 ▾</button>
+          <div class="export-dropdown" id="exportDropdown">
+            <button data-fmt="word">📄 匯出 Word (.doc)</button>
+            <button data-fmt="pdf">📕 匯出 PDF</button>
+          </div>
+        </div>
+        <button class="btn-ghost" id="copyBtn" disabled>📋 複製草稿</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="json">結構化擷取</button>
+      <button class="tab-btn" data-tab="reg">法規比對</button>
+      <button class="tab-btn" data-tab="cases">相似案例</button>
+      <button class="tab-btn" data-tab="draft">決定書草稿</button>
+    </div>
+    <div class="panel-card">
+      <div class="tab-panel active" id="panel-json"><div id="content-json"></div></div>
+      <div class="tab-panel" id="panel-reg"><div id="content-reg"></div></div>
+      <div class="tab-panel" id="panel-cases"><div id="content-cases"></div></div>
+      <div class="tab-panel" id="panel-draft"><div id="content-draft" class="draft-doc"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="perspectiveModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="mh-title">🔍 中立多元視角分析</div>
+        <div class="mh-sub">AI生成內容！僅供承辦人員內部參考</div>
+      </div>
+      <button class="modal-close" id="perspectiveCloseBtn">✕</button>
+    </div>
+    <div class="modal-body" id="perspectiveBody">
+      <div class="modal-loading" id="perspectiveLoading">
+        <div class="spin"></div>
+        <div id="pvProgressLabel" style="margin-top:10px;font-size:13px;color:var(--gray-600);">正在中立分析雙方主張……</div>
+      </div>
+      <div id="perspectiveContent" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="docModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="mh-title" id="docModalTitle">📄 內容檢視</div>
+        <div class="mh-sub" id="docModalSub"></div>
+      </div>
+      <button class="modal-close" id="docModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-loading" id="docModalLoading"><div class="spin"></div>載入中……</div>
+      <div class="doc-modal-body" id="docModalContent" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  "use strict";
+  try {
+
+  // 固定 API 端點
+  var API_BASE = "https://yayfg435c7.execute-api.us-west-2.amazonaws.com/v1";
+
+  // 回首頁按鈕
+  var homeBtn = document.getElementById("homeBtn");
+  if (homeBtn) homeBtn.addEventListener("click", function () { goToScreen("input"); });
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+    });
+  }
+
+  // 將長文中的中文列點/序號標記正規化為換行，避免所有內容連在一起。
+  // 回傳「純文字」（含 \n），供 pre-wrap 容器直接呈現；不含 HTML。
+  function normalizeListText(s) {
+    var t = String(s == null ? "" : s);
+    if (!t) return t;
+    t = t.replace(/\r\n/g, "\n");
+    // 已有換行者尊重原樣，僅壓縮多餘空白行
+    // 中文數字序號「一、二、…十、」在句中（非行首）時，前面補換行
+    t = t.replace(/([^\n。：:])((?:十[一二三四五六七八九]?|[一二三四五六七八九])、)/g, "$1\n$2");
+    // 括號序號「（一）(1) 1. 2)」等在句中時前補換行
+    t = t.replace(/([^\n])((?:（[一二三四五六七八九十]+）|\([0-9一二三四五六七八九十]+\)|[0-9]+[.)]、?))\s*/g, "$1\n$2 ");
+    // 注意：不再對「按/查」等單字轉折詞做換行，避免誤斷「調查、審查」等詞。
+    // 決定書理由欄之段落編號改由 formatReasons() 處理。
+    // 壓縮三個以上連續換行為兩個
+    t = t.replace(/\n{3,}/g, "\n\n");
+    return t.trim();
+  }
+
+  // 決定書「理由」欄專用：把段落起首的公文轉折詞（按/次按/又按/末按/查/經查/惟/綜上）
+  // 轉為「一、二、三…」編號列點。嚴格只認「段落開頭」的轉折詞，
+  // 且排除「調查/查明/查核/審查/檢查/偵查/清查/複查/查詢/查獲」等含「查」的詞，避免誤斷。
+  function formatReasons(s) {
+    var t = String(s == null ? "" : s);
+    if (!t) return t;
+    t = t.replace(/\r\n/g, "\n").trim();
+    // 段落起首轉折詞：位於全文開頭，或前面是句末標點（。！？）或既有換行。
+    // 轉折詞後須緊接標點（，、）或直接接內容，方視為段落標記。
+    // 「查」特別處理：只有在「查」單獨作為段落起首（後接標點或空白）時才算，
+    //   若「查」前一字構成詞（如調、審、檢、偵、清、複、查明等）則不動。
+    var LEAD = "(?:次按|末按|又按|再按|按|經查|綜上所述|綜上|惟查|惟)";
+    // 先在段落分界（句末標點後）標出候選轉折詞，插入分段標記
+    var re = new RegExp("([。！？!?])\\s*(" + LEAD + ")(?=[，、,]|[^\\u4e00-\\u9fa5]|$)", "g");
+    t = t.replace(re, "$1\n$2");
+    // 全文開頭若以轉折詞起始，確保它獨立成段（不需處理，split 會涵蓋）
+    // 依換行切段，過濾空段
+    var paras = t.split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
+    // 逐段判斷是否為「轉折詞起首」段落，是則編號
+    var cn = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十",
+              "十一", "十二", "十三", "十四", "十五"];
+    var leadRe = new RegExp("^" + LEAD + "(?=[，、,]|[^\\u4e00-\\u9fa5]|$)");
+    var idx = 0;
+    var out = paras.map(function (p) {
+      if (leadRe.test(p)) {
+        var num = cn[idx] || (idx + 1);
+        idx++;
+        return num + "、" + p;
+      }
+      return p;
+    });
+    // 若完全沒有偵測到轉折詞段落（可能 AI 沒用公文格式），退回原文的換行正規化
+    if (idx === 0) return normalizeListText(s);
+    return out.join("\n");
+  }
+
+  async function api(path, method, body) {
+    var opt = { method: method, headers: { "Content-Type": "application/json" } };
+    if (body) opt.body = JSON.stringify(body);
+    var res = await fetch(API_BASE + path, opt);
+    var text = await res.text();
+    var data;
+    try { data = JSON.parse(text); } catch (e) { data = { _raw: text }; }
+    if (!res.ok) throw new Error((data && data.error) || ("HTTP " + res.status));
+    return data;
+  }
+
+  var toastEl = document.getElementById("toast");
+  var toastTimer;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2800);
+  }
+
+  function bindCount(taId, countId) {
+    var ta = document.getElementById(taId);
+    var c = document.getElementById(countId);
+    if (!ta || !c) return;
+    var upd = function () { c.textContent = ta.value.length + " 字"; };
+    ta.addEventListener("input", upd);
+    upd();
+  }
+  bindCount("peopleText", "peopleCount");
+  bindCount("agencyText", "agencyCount");
+
+  // ---------- 檔案上傳與自動辨識 ----------
+  async function readFileText(file) {
+    var name = (file.name || "").toLowerCase();
+    if (name.endsWith(".pdf")) {
+      if (!window.pdfjsLib) throw new Error("PDF 解析元件未載入");
+      var buf = await file.arrayBuffer();
+      var pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      var all = [];
+      for (var p = 1; p <= pdf.numPages; p++) {
+        var page = await pdf.getPage(p);
+        var tc = await page.getTextContent();
+        all.push(tc.items.map(function (it) { return it.str; }).join(" "));
+      }
+      return all.join("\n");
+    }
+    if (name.endsWith(".txt") || name.endsWith(".md")) {
+      return await file.text();
+    }
+    if (name.endsWith(".docx")) {
+      throw new Error("DOCX 請先另存為 PDF 或 TXT 再上傳，或直接貼上內文");
+    }
+    return await file.text();
+  }
+
+  // 從檔名或內容推導案號與類別
+  function autofillMeta(filename, text) {
+    var caseNoEl = document.getElementById("caseNo");
+    var caseTypeEl = document.getElementById("caseType");
+    // 案號：優先從內容抓「新北法訴字第…號」或「○○字第…號」，否則用檔名（去副檔名）
+    if (!caseNoEl.value.trim()) {
+      var m = (text || "").match(/[\u4e00-\u9fa5]{0,8}字第\s*\d+\s*號/);
+      if (m) caseNoEl.value = m[0].replace(/\s+/g, "");
+      else if (filename) caseNoEl.value = filename.replace(/\.(pdf|txt|md|docx)$/i, "");
+    }
+    // 類別改由 AI 辨識（見 aiClassify），不再用前端關鍵字猜測
+  }
+
+  // 上傳檔案後以 AI 辨識案件類別並填入下拉
+  async function aiClassify(text) {
+    var caseTypeEl = document.getElementById("caseType");
+    var nameEls = [document.getElementById("peopleFileName"), document.getElementById("agencyFileName")];
+    try {
+      var res = await api("/api/v1/classify", "POST", { text: (text || "").slice(0, 6000) });
+      var cat = res && res.category;
+      if (cat) {
+        // 若下拉有對應選項則選取，否則設為「其他」
+        var opts = Array.prototype.map.call(caseTypeEl.options, function (o) { return o.value || o.text; });
+        caseTypeEl.value = opts.indexOf(cat) >= 0 ? cat : "其他";
+        showToast("AI 已辨識案件類別：" + cat);
+      }
+    } catch (e) {
+      // 分類失敗不阻斷，類別留待完整分析階段由 AI 確認
+    }
+  }
+
+  function setupDrop(dropId, fileId, textId, nameId) {
+    var drop = document.getElementById(dropId);
+    var fileInput = document.getElementById(fileId);
+    var textArea = document.getElementById(textId);
+    var nameEl = document.getElementById(nameId);
+    if (!drop) return;
+    async function handle(file) {
+      if (!file) return;
+      nameEl.textContent = "解析中：" + file.name + " ……";
+      try {
+        var text = await readFileText(file);
+        textArea.value = text.trim();
+        textArea.dispatchEvent(new Event("input"));
+        autofillMeta(file.name, text);
+        nameEl.textContent = "✓ 已載入：" + file.name + "（" + text.length + " 字）；AI 辨識類別中……";
+        showToast("已辨識檔案內容並填入");
+        aiClassify(text);
+      } catch (e) {
+        nameEl.textContent = "✕ " + e.message;
+        showToast("檔案處理失敗：" + e.message);
+      }
+    }
+    drop.addEventListener("click", function () { fileInput.click(); });
+    fileInput.addEventListener("change", function (e) { if (e.target.files[0]) handle(e.target.files[0]); });
+    ["dragenter", "dragover"].forEach(function (ev) {
+      drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("drag"); });
+    });
+    ["dragleave", "drop"].forEach(function (ev) {
+      drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("drag"); });
+    });
+    drop.addEventListener("drop", function (e) {
+      if (e.dataTransfer.files[0]) handle(e.dataTransfer.files[0]);
+    });
+  }
+  setupDrop("peopleDrop", "peopleFile", "peopleText", "peopleFileName");
+  setupDrop("agencyDrop", "agencyFile", "agencyText", "agencyFileName");
+
+  document.querySelectorAll(".party-tab").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".party-tab").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll(".party-panel").forEach(function (p) { p.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById("party-" + btn.dataset.party).classList.add("active");
+    });
+  });
+
+  document.querySelectorAll(".tab-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll("#screen-result .tab-panel").forEach(function (p) { p.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  function goToScreen(name) {
+    var inp = document.getElementById("screen-input");
+    var res = document.getElementById("screen-result");
+    var p1 = document.getElementById("stepPill1");
+    var p2 = document.getElementById("stepPill2");
+    if (name === "result") {
+      inp.style.display = "none"; res.style.display = "block";
+      p1.classList.remove("active"); p1.classList.add("done"); p2.classList.add("active");
+    } else {
+      res.style.display = "none"; inp.style.display = "block";
+      p2.classList.remove("active"); p1.classList.remove("done"); p1.classList.add("active");
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  document.getElementById("backBtn").addEventListener("click", function () { goToScreen("input"); });
+
+  function setStage(key, state) {
+    var el = document.querySelector('.stage-item[data-stage="' + key + '"]');
+    if (!el) return;
+    el.classList.remove("active", "done");
+    if (state) el.classList.add(state);
+  }
+
+  var runBtn = document.getElementById("runBtn");
+  var runBtnLabel = document.getElementById("runBtnLabel");
+  var stageProgress = document.getElementById("stageProgress");
+  var currentCaseId = null;
+
+  runBtn.addEventListener("click", async function () {
+    var peopleText = document.getElementById("peopleText").value.trim();
+    var agencyText = document.getElementById("agencyText").value.trim();
+    if (!peopleText || !agencyText) { showToast("訴願書與答辯書須兩份到齊後才能執行解析"); return; }
+    runBtn.disabled = true;
+    runBtn.classList.add("loading");
+    runBtnLabel.textContent = "解析中，請稍候……";
+    stageProgress.classList.add("show");
+    ["deid", "extract", "retrieve", "draft"].forEach(function (k) { setStage(k, ""); });
+
+    try {
+      setStage("deid", "active");
+      var created = await api("/api/v1/cases", "POST", {
+        case_no: document.getElementById("caseNo").value,
+        category: document.getElementById("caseType").value,
+        appellant_text: peopleText,
+        agency_text: agencyText,
+      });
+      currentCaseId = created.case_id;
+      await api("/api/v1/cases/" + currentCaseId + "/analyze", "POST", {});
+
+      var stages = ["deid", "extract", "retrieve", "draft"];
+      var stageIdx = 0;
+      var done = false;
+      for (var i = 0; i < 60 && !done; i++) {
+        await new Promise(function (r) { setTimeout(r, 4000); });
+        if (stageIdx < stages.length) {
+          if (stageIdx > 0) setStage(stages[stageIdx - 1], "done");
+          setStage(stages[stageIdx], "active");
+          stageIdx++;
+        }
+        var stt = await api("/api/v1/cases/" + currentCaseId + "/analyze/status", "GET");
+        if (["SUCCEEDED", "FAILED", "TIMED_OUT", "ABORTED"].indexOf(stt.status) >= 0) {
+          done = true;
+          if (stt.status !== "SUCCEEDED") throw new Error("分析未成功：" + stt.status);
+        }
+      }
+      if (!done) throw new Error("分析逾時，請稍後於結果頁重試");
+      stages.forEach(function (k) { setStage(k, "done"); });
+
+      var result = await api("/api/v1/cases/" + currentCaseId + "/result", "GET");
+      renderResults(result);
+      goToScreen("result");
+      document.getElementById("perspectiveBtn").disabled = false;
+      document.getElementById("copyBtn").disabled = false;
+      document.getElementById("exportBtn").disabled = false;
+      showToast("解析完成，已產出結構化資料、法規比對、相似案例與草稿");
+    } catch (e) {
+      showToast("錯誤：" + e.message);
+    } finally {
+      runBtn.disabled = false;
+      runBtn.classList.remove("loading");
+      runBtnLabel.textContent = "開始處理";
+      stageProgress.classList.remove("show");
+    }
+  });
+
+  function renderResults(payload) {
+    var r = (payload && payload.result) || {};
+    var structured = r.structured || {};
+    var regs = r.regulation_matches || [];
+    var regList = r.regulation_list || [];
+    var cases = r.similar_cases || [];
+    var skip = r.procedural_skip || "";
+    var draft = r.draft || {};
+    var caseNo = payload.case_no || "";
+    var caseType = payload.category || "";
+
+    var points = function (arr) {
+      return (arr && arr.length)
+        ? '<ul class="field-list">' + arr.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>"
+        : '<div class="field-value" style="color:var(--gray-500)">（原文未提及）</div>';
+    };
+    var procFlag = structured.procedural_dismissal_flag;
+    document.getElementById("content-json").innerHTML =
+      '<div class="field-card"><div class="field-card-title">案件基本資訊</div>' +
+      '<div class="field-grid">' +
+      '<div class="field-item"><div class="field-label">案件類別（AI 確認）</div><div class="field-value"><span class="field-tag">' + esc(structured.case_type || caseType || "—") + "</span></div></div>" +
+      '<div class="field-item"><div class="field-label">裁罰內容</div><div class="field-value">' + esc(structured.penalty_content || "—") + "</div></div>" +
+      '<div class="field-item"><div class="field-label">訴願請求事項</div><div class="field-value">' + esc(structured.appeal_request || "—") + "</div></div>" +
+      "</div></div>" +
+      '<div class="field-card"><div class="field-card-title">雙方主張</div>' +
+      '<div class="field-item full"><div class="field-label">訴願人主張要點</div>' + points(structured.appellant_points) + "</div>" +
+      '<div class="field-item full"><div class="field-label">機關答辯要點</div>' + points(structured.agency_points) + "</div></div>" +
+      '<div class="field-card"><div class="field-card-title">爭點與審理路徑</div>' +
+      '<div class="field-item full"><div class="field-label">爭點類型</div><div class="field-value">' + esc(structured.dispute_type || "—") + "</div></div>" +
+      '<div class="field-item full"><div class="field-label">程序駁回判斷</div><div class="field-value">' +
+      (procFlag === true ? "是（" + esc(structured.procedural_dismissal_reason || "程序不受理") + "）" : "否，進入實體審理") + "</div></div></div>";
+
+    function srcName(uri) {
+      if (!uri) return "";
+      var n = uri.split("/").pop();
+      return n.replace(".md", "").replace(".pdf", "").replace(" 的副本", "");
+    }
+    var regEl = document.getElementById("content-reg");
+    if (skip) {
+      regEl.innerHTML =
+        '<div class="empty-state"><div class="ic">⚖️</div><div class="t1">本案為程序駁回案件</div>' +
+        '<div class="t2">' + esc(skip) + "。故不進行法規比對推薦；決定書將依訴願法第77條以「訴願不受理」處理。</div></div>";
+    } else if (regList.length) {
+      // 結構化法條清單（乾淨卡片：法規名稱+條號、要旨、狀態，可點擊看全文）
+      regEl.innerHTML = regList.map(function (g) {
+        var name = esc(g.law_name || "相關法規");
+        var art = g.article ? "　" + esc(g.article) : "";
+        var status = g.status || "現行有效";
+        var badgeCls = status.indexOf("注意") >= 0 ? "warn" : "ok";
+        var uri = g.source_uri || "";
+        var artAttr = g.article ? ' data-article="' + esc(g.article) + '"' : "";
+        return '<div class="reg-card' + (uri ? " clickable" : "") + '"' + (uri ? ' data-uri="' + esc(uri) + '" data-title="' + name + art + '"' + artAttr : "") + '><div class="reg-head">' +
+          '<span class="reg-name">' + name + art + "</span>" +
+          '<span class="reg-badge ' + badgeCls + '">' + esc(status) + "</span></div>" +
+          '<div class="reg-body">' + esc(g.summary || "") + "</div>" +
+          (uri ? '<div class="click-hint">🔍 點擊查看該條完整內容</div>' : "") +
+          "</div>";
+      }).join("");
+    } else if (regs.length) {
+      regEl.innerHTML = regs.map(function (reg) {
+        var txt = reg.text || reg.content || "";
+        var loc = reg.location || {};
+        var src = (loc.s3Location && loc.s3Location.uri) || "";
+        return '<div class="reg-card' + (src ? " clickable" : "") + '"' + (src ? ' data-uri="' + esc(src) + '" data-title="' + esc(srcName(src)) + '"' : "") + '><div class="reg-head"><span class="reg-name">' + esc(srcName(src) || "相關法規片段") + "</span>" +
+          '<span class="reg-badge ok">檢索命中</span></div>' +
+          '<div class="reg-body">' + esc(txt.slice(0, 400)) + "</div>" +
+          (src ? '<div class="click-hint">🔍 點擊查看完整內容</div>' : "") + "</div>";
+      }).join("");
+    } else {
+      regEl.innerHTML =
+        '<div class="empty-state"><div class="ic">📚</div><div class="t1">尚無法規比對命中結果</div>' +
+        '<div class="t2">本案檢索無命中，或知識庫尚未匯入相關法規。</div></div>';
+    }
+    // 綁定法條卡片點擊 → 開該條內容 modal（帶條號，只顯示單一條文）
+    regEl.querySelectorAll(".reg-card.clickable").forEach(function (card) {
+      card.addEventListener("click", function () {
+        openDoc(card.dataset.uri, card.dataset.title || "法條內容", card.dataset.article || "");
+      });
+    });
+
+    function rulingClass(ruling) {
+      if (!ruling) return "dismiss";
+      if (ruling.indexOf("撤銷") >= 0 && ruling.indexOf("部分") < 0) return "revoke";
+      if (ruling.indexOf("部分") >= 0) return "partial";
+      return "dismiss";
+    }
+    var caseEl = document.getElementById("content-cases");
+    if (skip) {
+      caseEl.innerHTML =
+        '<div class="empty-state"><div class="ic">⚖️</div><div class="t1">本案為程序駁回案件</div>' +
+        '<div class="t2">' + esc(skip) + "。故不進行相似案例推薦。</div></div>";
+    } else if (cases.length) {
+      caseEl.innerHTML = cases.map(function (c) {
+        var pct = c.score != null ? Math.min(100, Math.round(Number(c.score) * 100)) : 0;
+        var ruling = c.main_ruling || "未明";
+        var reasoning = c.reasoning || (c.text || "").slice(0, 120);
+        var uri = c.source_uri || "";
+        return '<div class="case-card' + (uri ? " clickable" : "") + '"' + (uri ? ' data-uri="' + esc(uri) + '" data-title="' + esc(c.case_no || "案例") + '"' : "") + '>' +
+          '<div class="case-head"><span class="case-no">' + esc(c.case_no || "案例") + "</span>" +
+          '<span class="case-result ' + rulingClass(ruling) + '">主文主旨：' + esc(ruling) + "</span></div>" +
+          '<div class="sim-bar-row"><div class="sim-bar-track"><div class="sim-bar-fill" style="width:' + pct + '%"></div></div><span class="sim-pct">' + pct + "%</span></div>" +
+          '<div class="case-line"><b>論理重點：</b>' + esc(reasoning) + "</div>" +
+          (uri ? '<div class="click-hint">🔍 點擊查看原始' + (uri.toLowerCase().indexOf(".pdf") >= 0 ? " PDF " : "") + '判決／決定書</div>' : "") +
+          "</div>";
+      }).join("");
+    } else {
+      caseEl.innerHTML =
+        '<div class="empty-state"><div class="ic">🗂️</div><div class="t1">尚無相似案例</div>' +
+        '<div class="t2">相似案例重排結果將於此顯示。</div></div>';
+    }
+    // 綁定案例卡片點擊 → 開原文（PDF 開新視窗，md 開 modal）
+    caseEl.querySelectorAll(".case-card.clickable").forEach(function (card) {
+      card.addEventListener("click", function () {
+        openDoc(card.dataset.uri, card.dataset.title || "案例原文");
+      });
+    });
+
+    // 背景預抓所有可點擊來源的內容，讓點擊時能即時顯示
+    var prefetchUris = [];
+    regEl.querySelectorAll(".reg-card.clickable").forEach(function (c) { if (c.dataset.uri) prefetchUris.push(c.dataset.uri); });
+    caseEl.querySelectorAll(".case-card.clickable").forEach(function (c) { if (c.dataset.uri) prefetchUris.push(c.dataset.uri); });
+    prefetchDocs(prefetchUris);
+
+    var isProc = procFlag === true;
+    document.getElementById("content-draft").innerHTML =
+      '<div class="draft-title">新北市政府訴願決定書（草稿）</div>' +
+      '<div class="draft-meta mono">案由：' + esc(structured.case_type || caseType || "—") + "</div>" +
+      '<div style="text-align:center;"><span class="path-badge ' + (isProc ? "procedural" : "substantive") + '">' + (isProc ? "程序審理（不受理）" : "實體審理") + "</span></div>" +
+      '<div class="cite-notice">⚠ 本草稿理由欄引用之法條係由 AI 依一般法律知識生成，<b>非經本系統法規資料庫核可</b>，正式引用前請對照 <a href="https://law.moj.gov.tw/" target="_blank" rel="noopener">全國法規資料庫 (law.moj.gov.tw)</a> 查證條文現行內容。經資料庫檢索之法規詳見「法規比對」分頁。</div>' +
+      draftSection("主文", draft.main_text, "main") +
+      (isProc ? "" : draftSection("事實", draft.facts_content, "facts")) +
+      draftSection("理由", draft.reasons_content, "reasons") +
+      draftSection("教示規定", draft.notice_content, "notice") +
+      (isProc ? '<div style="font-size:11px;color:var(--amber);background:var(--amber-100);border-radius:4px;padding:6px 10px;margin-top:8px;">本案為程序駁回（訴願不受理）案件，依公文慣例不列事實欄，理由欄以「按（法條）…查（程序事實）…」涵攝訴願法第77條各款。</div>' : "") +
+      '<div style="font-size:11px;color:var(--gray-500);margin-top:14px;padding-top:10px;border-top:1px dashed var(--gray-200);">目前版本：v1（AI 初稿，尚未經人工核定）。各欄位可直接點擊編輯。</div>' +
+      // 草稿 AI 修訂對話框
+      '<div class="revise-box">' +
+        '<div class="revise-title">💬 AI 修訂指令 <span style="font-weight:400;color:var(--gray-500);font-size:11px;">（以自然語言請 AI 調整草稿，例如「加強程序部分的論述」）</span></div>' +
+        '<div class="revise-row">' +
+          '<select id="reviseTarget"><option value="reasons">理由欄</option>' + (isProc ? "" : '<option value="facts">事實欄</option>') + '<option value="main">主文</option><option value="notice">教示規定</option></select>' +
+          '<input type="text" id="reviseInput" placeholder="輸入您希望 AI 調整的方向……">' +
+          '<button id="reviseBtn">送出</button>' +
+        '</div>' +
+        '<div class="revise-log" id="reviseLog"></div>' +
+      "</div>";
+    bindRevise();
+  }
+
+  function draftSection(title, content, field) {
+    var body;
+    if (!content) {
+      body = "（本欄位 AI 未產出內容，請承辦人員補充）";
+    } else if (field === "reasons") {
+      body = formatReasons(content);   // 理由欄：按/查/惟等段落轉折詞轉「一、二、」編號列點
+    } else {
+      body = normalizeListText(content);
+    }
+    return '<div class="draft-section"><h4>' + title + "</h4>" +
+      '<div class="draft-body" contenteditable="true" data-field="' + field + '">' + esc(body) + "</div></div>";
+  }
+
+  function bindRevise() {
+    var btn = document.getElementById("reviseBtn");
+    var input = document.getElementById("reviseInput");
+    var sel = document.getElementById("reviseTarget");
+    var log = document.getElementById("reviseLog");
+    if (!btn) return;
+    var fieldMap = { main: "main", facts: "facts", reasons: "reasons", notice: "notice" };
+    function addMsg(role, text) {
+      var el = document.createElement("div");
+      el.className = "revise-msg " + role;
+      el.textContent = text;
+      log.appendChild(el);
+      log.scrollTop = log.scrollHeight;
+      return el;
+    }
+    async function send() {
+      var instr = input.value.trim();
+      if (!instr) { showToast("請先輸入修訂指令"); return; }
+      if (!currentCaseId) { showToast("尚無案件"); return; }
+      var target = sel.value;
+      addMsg("user", "【" + sel.options[sel.selectedIndex].text + "】" + instr);
+      input.value = "";
+      btn.disabled = true;
+      var thinking = addMsg("ai", "AI 修訂中……");
+      try {
+        var res = await api("/api/v1/cases/" + currentCaseId + "/revise", "POST",
+                            { instruction: instr, target: target });
+        var updated = res.updated_content || "";
+        thinking.textContent = "已更新「" + sel.options[sel.selectedIndex].text + "」內容。";
+        // 更新對應草稿欄位顯示
+        var body = document.querySelector('.draft-body[data-field="' + fieldMap[target] + '"]');
+        if (body && updated) body.textContent = updated;
+        if (res.warning) {
+          var w = document.createElement("div");
+          w.className = "revise-warn";
+          w.textContent = "⚠ " + res.warning;
+          log.appendChild(w);
+        }
+        showToast("草稿已依指令更新");
+      } catch (e) {
+        thinking.textContent = "修訂失敗：" + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    btn.addEventListener("click", send);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); send(); }
+    });
+  }
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var text = document.getElementById("content-draft").innerText;
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+      .then(function () { showToast("已複製草稿內容至剪貼簿"); })
+      .catch(function () { showToast("複製失敗，請手動選取文字"); });
+  });
+
+  // ---------- 匯出 Word / PDF ----------
+  var exportBtn = document.getElementById("exportBtn");
+  var exportDropdown = document.getElementById("exportDropdown");
+  exportBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    exportDropdown.classList.toggle("show");
+  });
+  document.addEventListener("click", function () { exportDropdown.classList.remove("show"); });
+  exportDropdown.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    exportDropdown.classList.remove("show");
+    if (b.dataset.fmt === "word") exportWord();
+    else exportPdf();
+  });
+
+  function draftPlain() {
+    // 收集草稿四欄位純文字
+    var out = [];
+    document.querySelectorAll("#content-draft .draft-section").forEach(function (sec) {
+      var h = sec.querySelector("h4");
+      var body = sec.querySelector(".draft-body");
+      if (h && body) out.push({ title: h.textContent, text: body.innerText });
+    });
+    var caseNo = (document.querySelector("#content-draft .draft-meta") || {}).textContent || "";
+    return { caseNo: caseNo, sections: out };
+  }
+
+  function exportWord() {
+    var d = draftPlain();
+    var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>';
+    html += '<h2 style="text-align:center">新北市政府訴願決定書（草稿）</h2>';
+    html += '<p style="text-align:center;color:#666">' + esc(d.caseNo) + "</p>";
+    d.sections.forEach(function (s) {
+      html += '<h3 style="border-left:4px solid #1E4F78;padding-left:8px">' + esc(s.title) + "</h3>";
+      html += '<p style="line-height:2;white-space:pre-wrap">' + esc(s.text).replace(/\n/g, "<br>") + "</p>";
+    });
+    html += '<p style="color:#999;font-size:12px;margin-top:24px">本文件為 AI 輔助產生之草稿，須經承辦人員核定後始為正式文書。</p>';
+    html += "</body></html>";
+    var blob = new Blob(["\ufeff", html], { type: "application/msword" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "訴願決定書草稿.doc";
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast("已匯出 Word 檔");
+  }
+
+  function exportPdf() {
+    var d = draftPlain();
+    var w = window.open("", "_blank");
+    if (!w) { showToast("瀏覽器阻擋彈出視窗，請允許後重試"); return; }
+    var html = '<html><head><meta charset="utf-8"><title>訴願決定書草稿</title><style>body{font-family:"Noto Sans TC",sans-serif;padding:40px;line-height:2;color:#161D26;}h2{text-align:center;}h3{border-left:4px solid #1E4F78;padding-left:8px;font-size:15px;}p{white-space:pre-wrap;}.meta{text-align:center;color:#666;}.foot{color:#999;font-size:12px;margin-top:24px;}</style></head><body>';
+    html += "<h2>新北市政府訴願決定書（草稿）</h2>";
+    html += '<p class="meta">' + esc(d.caseNo) + "</p>";
+    d.sections.forEach(function (s) {
+      html += "<h3>" + esc(s.title) + "</h3><p>" + esc(s.text) + "</p>";
+    });
+    html += '<p class="foot">本文件為 AI 輔助產生之草稿，須經承辦人員核定後始為正式文書。</p>';
+    html += "<script>window.onload=function(){window.print();}<\/script></body></html>";
+    w.document.write(html);
+    w.document.close();
+    showToast("已開啟列印視窗，可選擇另存為 PDF");
+  }
+
+  // ---------- 文件檢視 modal（法條全文 / 案例原文） ----------
+  var docModal = document.getElementById("docModal");
+  var docModalLoading = document.getElementById("docModalLoading");
+  var docModalContent = document.getElementById("docModalContent");
+  document.getElementById("docModalClose").addEventListener("click", function () {
+    docModal.classList.remove("show");
+  });
+  docModal.addEventListener("click", function (e) {
+    if (e.target === docModal) docModal.classList.remove("show");
+  });
+
+  // 文件內容快取：{uri: {kind:"text"|"pdf", text?, url?}}
+  var docCache = {};
+
+  function fetchDoc(uri) {
+    // 回傳 Promise，結果存快取；避免重複請求
+    if (docCache[uri] && docCache[uri]._p) return docCache[uri]._p;
+    var p = api("/api/v1/document", "POST", { s3_uri: uri, mode: "text" })
+      .then(function (r) {
+        if (r.is_pdf && r.url) docCache[uri] = { kind: "pdf", url: r.url };
+        else docCache[uri] = { kind: "text", text: r.text || "（無內容）" };
+        return docCache[uri];
+      });
+    docCache[uri] = { _p: p };
+    return p;
+  }
+
+  function prefetchDocs(uris) {
+    // 逐一背景預抓（間隔避免瞬間大量請求）
+    var i = 0;
+    function next() {
+      if (i >= uris.length) return;
+      var u = uris[i++];
+      fetchDoc(u).catch(function () {}).finally(function () { setTimeout(next, 300); });
+    }
+    next();
+  }
+
+  function openPdfWindow(url, title) {
+    var win = window.open(url, "_blank");
+    if (!win || win.closed || typeof win.closed === "undefined") {
+      document.getElementById("docModalTitle").textContent = "📕 " + (title || "原始 PDF");
+      document.getElementById("docModalSub").textContent = "";
+      docModal.classList.add("show");
+      docModalLoading.style.display = "none";
+      docModalContent.style.display = "block";
+      docModalContent.innerHTML = '<p>瀏覽器阻擋了自動開新視窗。請點擊下方連結檢視原始 PDF：</p>' +
+        '<p><a href="' + url + '" target="_blank" rel="noopener" style="color:var(--navy-700);font-weight:600;">🔗 開新視窗檢視原始 PDF</a></p>';
+    }
+  }
+
+  // 去掉 markdown 標題的井字號「#」（行首的 # 或 ## 等），保留標題文字本身。
+  // 例：「### 第63條」→「第63條」；不影響非標題行內容。
+  function stripMarkdownHashes(text) {
+    if (!text) return text;
+    return String(text).replace(/^[ \t]*#{1,6}[ \t]*/gm, "");
+  }
+
+  // 從整份法規 md 依條號擷取「單一條文」內容（含該條標題到下一條前）。
+  // 支援格式：「### 第63條」「## 第63-1條」「第 63 條」等；條號可含 -1、之1。
+  // 擷取不到時回傳 null，呼叫端退回顯示全文。
+  function extractArticle(mdText, article) {
+    if (!mdText || !article) return null;
+    // 從 article（如「第63條」「第63-1條」「第63條之1」）取出數字主體
+    var m = String(article).match(/第?\s*([0-9]+(?:[-‑–]\s*[0-9]+)?(?:\s*之\s*[0-9]+)?)\s*條/);
+    if (!m) return null;
+    var numRaw = m[1].replace(/\s+/g, "");
+    // 正規化各種寫法為統一比對：把「之」與「–/‑」都視為「-」
+    var numNorm = numRaw.replace(/之/g, "-").replace(/[‑–]/g, "-");
+    var lines = mdText.replace(/\r\n/g, "\n").split("\n");
+    // 找出所有「條文起始行」的索引與其條號
+    // 條文起始樣式：可能有 markdown 標題符號 #，接著「第X條」
+    var artRe = /^#{0,6}\s*第\s*([0-9]+(?:[-‑–]\s*[0-9]+)?(?:\s*之\s*[0-9]+)?)\s*條/;
+    var starts = [];
+    for (var i = 0; i < lines.length; i++) {
+      var mm = lines[i].match(artRe);
+      if (mm) {
+        var n = mm[1].replace(/\s+/g, "").replace(/之/g, "-").replace(/[‑–]/g, "-");
+        starts.push({ idx: i, num: n });
+      }
+    }
+    if (!starts.length) return null;
+    // 找到目標條的起始
+    var target = -1;
+    for (var k = 0; k < starts.length; k++) {
+      if (starts[k].num === numNorm) { target = k; break; }
+    }
+    if (target < 0) return null;
+    var from = starts[target].idx;
+    var to = (target + 1 < starts.length) ? starts[target + 1].idx : lines.length;
+    var seg = lines.slice(from, to).join("\n").trim();
+    return seg || null;
+  }
+
+  async function openDoc(uri, title, article) {
+    if (!uri) return;
+    // 內部：把 text 內容依 article 收斂為單條（法規檔），並套排版
+    function renderText(text) {
+      var body = text;
+      if (article) {
+        var one = extractArticle(text, article);
+        if (one) body = one;   // 擷取到該條 → 只顯示該條
+      }
+      body = stripMarkdownHashes(body);   // 去掉 markdown 標題的 # 符號
+      docModalContent.innerHTML = esc(normalizeListText(body));
+    }
+    // 已有快取 → 立即顯示
+    var cached = docCache[uri];
+    if (cached && !cached._p) {
+      if (cached.kind === "pdf") { openPdfWindow(cached.url, title); return; }
+      document.getElementById("docModalTitle").textContent = "📄 " + (title || "內容");
+      document.getElementById("docModalSub").textContent = article ? esc(article) : uri.split("/").pop();
+      renderText(cached.text);
+      docModalLoading.style.display = "none";
+      docModalContent.style.display = "block";
+      docModal.classList.add("show");
+      return;
+    }
+    // 尚未抓好 → 顯示 modal loading 並等待（fetchDoc 會存快取）
+    document.getElementById("docModalTitle").textContent = "📄 " + (title || "內容");
+    document.getElementById("docModalSub").textContent = article ? esc(article) : uri.split("/").pop();
+    docModal.classList.add("show");
+    docModalLoading.style.display = "block";
+    docModalContent.style.display = "none";
+    docModalContent.innerHTML = "";
+    try {
+      var d = await fetchDoc(uri);
+      if (d.kind === "pdf") { docModal.classList.remove("show"); openPdfWindow(d.url, title); return; }
+      renderText(d.text);
+    } catch (e) {
+      docModalContent.textContent = "載入失敗：" + e.message;
+    }
+    docModalLoading.style.display = "none";
+    docModalContent.style.display = "block";
+  }
+
+  var perspectiveModal = document.getElementById("perspectiveModal");
+  var perspectiveLoading = document.getElementById("perspectiveLoading");
+  var perspectiveContent = document.getElementById("perspectiveContent");
+
+  document.getElementById("perspectiveBtn").addEventListener("click", openPerspective);
+  document.getElementById("perspectiveCloseBtn").addEventListener("click", function () {
+    perspectiveModal.classList.remove("show");
+  });
+  perspectiveModal.addEventListener("click", function (e) {
+    if (e.target === perspectiveModal) perspectiveModal.classList.remove("show");
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      perspectiveModal.classList.remove("show");
+      var dm = document.getElementById("docModal");
+      if (dm) dm.classList.remove("show");
+    }
+  });
+
+  async function openPerspective() {
+    if (!currentCaseId) { showToast("請先完成案件分析"); return; }
+    perspectiveModal.classList.add("show");
+    // 已有快取（同一案件先前已生成）→ 直接顯示，不重新呼叫 API
+    if (perspectiveHtmlCache[currentCaseId]) {
+      perspectiveLoading.style.display = "none";
+      perspectiveContent.innerHTML = perspectiveHtmlCache[currentCaseId];
+      perspectiveContent.style.display = "block";
+      bindPerspectiveChat();
+      return;
+    }
+    perspectiveLoading.style.display = "block";
+    perspectiveContent.style.display = "none";
+    perspectiveContent.innerHTML = "";
+    setPvProgress(8, "正在中立分析雙方主張與爭點……");
+    try {
+      // 第一段：核心分析（雙方摘要、爭點、細節）— 佔進度約 1/3
+      var pv = await api("/api/v1/cases/" + currentCaseId + "/perspective-analysis", "POST", {});
+      var data = pv && pv.perspective ? pv.perspective : pv;
+      if (!data || (!data.appellant_summary && !data.key_disputes && !data.notable_details)) {
+        throw new Error("回傳資料格式不符或為空");
+      }
+      setPvProgress(40, "已完成雙方摘要與爭點，載入延伸分析……");
+      lastPerspective = data;
+      perspectiveContent.innerHTML = buildPerspectiveHtml(data);
+      bindPerspectiveChat();
+      perspectiveLoading.style.display = "none";
+      perspectiveContent.style.display = "block";
+      // 第二段：延伸分析（多視角、法院實務）— 逐段載入並更新進度
+      loadPerspectiveExtra();
+    } catch (e) {
+      perspectiveContent.innerHTML = '<div class="pv-disclaimer">分析失敗：' + esc(e.message) + "</div>";
+      perspectiveLoading.style.display = "none";
+      perspectiveContent.style.display = "block";
+    }
+  }
+
+  // 更新多元視角載入階段文字（進度條已移除，僅保留階段提示文字）
+  function setPvProgress(pct, label) {
+    var lblEl = document.getElementById("pvProgressLabel");
+    if (lblEl && label) lblEl.textContent = label;
+  }
+  var lastPerspective = null;
+  var perspectiveHtmlCache = {};  // key=case_id → 已生成之完整多元視角 HTML（含 core+extra），重點開直接用
+
+  async function loadPerspectiveExtra() {
+    var slot = document.getElementById("pvExtraSlot");
+    if (!slot) return;
+    var cid = currentCaseId;
+    function part(p) {
+      return api("/api/v1/cases/" + cid + "/perspective-analysis/extra", "POST", { part: p })
+        .catch(function () { return {}; });
+    }
+    // pvExtraSlot 內的載入提示（逐段更新）
+    function slotLoading(msg) {
+      slot.innerHTML = '<div class="pv-section-title">🧭 不同視角與法院實務見解</div>' +
+        '<div class="modal-loading" style="padding:20px;"><div class="spin"></div>' + esc(msg) + "</div>";
+    }
+    try {
+      // 逐段載入：先「多視角提問」，再「法院實務見解」，每段完成更新進度條，
+      // 單段各自為獨立 API 呼叫、輸入已截斷，確保不超時。
+      slotLoading("正在整理不同法學視角的提問……");
+      var r1 = await part("angles");
+      setPvProgress(70, "已完成多視角提問，整理法院實務見解……");
+      slotLoading("正在整理法院實務一般見解……");
+      var r2 = await part("court");
+      setPvProgress(100, "分析完成");
+      var ex = {
+        multi_perspectives: r1.multi_perspectives || [],
+        court_views: r2.court_views || [],
+      };
+      if (lastPerspective) {
+        lastPerspective.multi_perspectives = ex.multi_perspectives;
+        lastPerspective.court_views = ex.court_views;
+      }
+      slot.innerHTML = buildPerspectiveExtraHtml(ex);
+      // core + extra 皆已生成，存快取；同一案件重點開直接顯示不重新生成
+      if (cid) perspectiveHtmlCache[cid] = perspectiveContent.innerHTML;
+    } catch (e) {
+      slot.innerHTML = '<div class="pv-detail"><div class="pv-detail-text" style="color:var(--gray-500)">延伸分析載入失敗：' + esc(e.message) + "，可稍後重開分析。</div></div>";
+    }
+  }
+
+  function buildPerspectiveHtml(pv) {
+    var html = '<div class="pv-disclaimer">⚠ ' + esc(pv.disclaimer || "本分析為中立參考，不代表任何一方立場，亦不構成決定書之直接論據，實質判斷仍應由承辦人員依卷證資料自行認定。") + "</div>";
+
+    // 雙方主張中立摘要
+    html += '<div class="pv-section-title">雙方主張中立摘要</div>' +
+      '<div class="pv-columns">' +
+      '<div class="pv-col people"><div class="pv-col-head">👤 訴願人主張</div><div class="pv-col-body">' + esc(pv.appellant_summary || "—") + "</div></div>" +
+      '<div class="pv-col agency"><div class="pv-col-head">🏛 機關答辯</div><div class="pv-col-body">' + esc(pv.agency_summary || "—") + "</div></div>" +
+      "</div>";
+
+    // 本案爭點
+    var disputes = pv.key_disputes || [];
+    if (disputes.length) {
+      html += '<div class="pv-section-title">⚖️ 本案爭點分析</div>';
+      html += disputes.map(function (d) {
+        return '<div class="pv-detail"><div class="pv-detail-text"><b>爭點：</b>' + esc(d.dispute || "") + "</div>" +
+          '<div class="pv-detail-meta" style="flex-direction:column;gap:4px;align-items:stretch;">' +
+          '<span style="font-size:12px;"><span class="pv-tag">訴願人</span> ' + esc(d.appellant_view || "—") + "</span>" +
+          '<span style="font-size:12px;"><span class="pv-tag agency">機關</span> ' + esc(d.agency_view || "—") + "</span>" +
+          "</div></div>";
+      }).join("");
+    }
+
+    // 值得留意的細節
+    var details = pv.notable_details || [];
+    if (details.length) {
+      html += '<div class="pv-section-title">🔎 值得留意的細節</div>';
+      html += details.map(function (d) {
+        var rel = d.related_to || "";
+        var tagCls = rel.indexOf("機關") >= 0 ? "agency" : (rel.indexOf("雙方") >= 0 ? "both" : "");
+        return '<div class="pv-detail"><div class="pv-detail-text">' + esc(d.detail || "") + "</div>" +
+          '<div class="pv-detail-meta"><span class="pv-tag ' + tagCls + '">' + esc(rel || "—") + "</span>" +
+          (d.source_reference ? '<span class="pv-ref">' + esc(d.source_reference) + "</span>" : "") + "</div></div>";
+      }).join("");
+    }
+
+    // 延伸分析佔位（多視角/法院實務由第二段背景載入）
+    html += '<div id="pvExtraSlot"><div class="pv-section-title">🧭 不同視角與法院實務見解</div>' +
+      '<div class="modal-loading" style="padding:20px;"><div class="spin"></div>延伸分析生成中……</div></div>';
+
+    // 討論對話框
+    html += '<div class="pv-chat">' +
+      '<div class="pv-chat-title">💬 與 AI 討論</div>' +
+      '<div class="pv-chat-desc">針對上方分析提出您的想法或疑問，AI 將依卷內資料與一般法學通識回覆（不臆測卷內未載明之事實，亦不給裁決建議）。</div>' +
+      '<div class="pv-chat-log" id="pvChatLog"></div>' +
+      '<div class="pv-chat-input-row"><textarea class="pv-chat-input" id="pvChatInput" rows="1" placeholder="輸入您想討論的想法……"></textarea>' +
+      '<button class="pv-chat-send" id="pvChatSend">送出</button></div>' +
+      "</div>";
+    return html;
+  }
+
+  function buildPerspectiveExtraHtml(ex) {
+    var html = '<div class="pv-section-title">🧭 不同視角的關鍵提問</div>';
+    var persp = ex.multi_perspectives || [];
+    html += persp.length ? persp.map(function (p) {
+      return '<div class="pv-detail"><div class="pv-detail-text"><b>【' + esc(p.angle || "視角") + "】</b>" + esc(p.question || "") + "</div></div>";
+    }).join("") : '<div class="pv-detail"><div class="pv-detail-text" style="color:var(--gray-500)">（無）</div></div>';
+
+    var courts = ex.court_views || [];
+    html += '<div class="pv-section-title">📚 法院實務一般見解</div>';
+    html += '<div class="cite-notice">⚠ 以下法院實務一般見解係由 AI 依<b>一般法律通識</b>整理，並要求標示來源或提出者，<b>惟非引自本系統資料庫之特定判決或文獻</b>。所列來源仍可能有誤，僅供思考參考，正式引用前務必自行查證（如 <a href="https://judgment.judicial.gov.tw/" target="_blank" rel="noopener">司法院裁判書查詢</a>、<a href="https://law.moj.gov.tw/" target="_blank" rel="noopener">全國法規資料庫</a>）。</div>';
+    html += '<div class="pv-col-body">' +
+      (courts.length ? "<ul style='margin:0;padding-left:18px;'>" + courts.map(function (c) {
+        var view = (typeof c === "object" && c) ? (c.view || "") : c;
+        var src = (typeof c === "object" && c) ? (c.source || "") : "";
+        return "<li>" + esc(view) + (src ? "<div style='font-size:12px;color:var(--gray-500);margin-top:2px;'>來源／提出者：" + esc(src) + "</div>" : "") + "</li>";
+      }).join("") + "</ul>" : "—") +
+      "</div>";
+    return html;
+  }
+
+  function bindPerspectiveChat() {
+    var log = document.getElementById("pvChatLog");
+    var input = document.getElementById("pvChatInput");
+    var sendBtn = document.getElementById("pvChatSend");
+    if (!log || !sendBtn) return;
+    var history = [];
+    function addMsg(role, text) {
+      var el = document.createElement("div");
+      el.className = "pv-msg " + role;
+      el.textContent = text;
+      log.appendChild(el);
+      log.scrollTop = log.scrollHeight;
+      return el;
+    }
+    async function send() {
+      var q = input.value.trim();
+      if (!q) { showToast("請先輸入想討論的內容"); return; }
+      if (!currentCaseId) return;
+      addMsg("user", q);
+      history.push({ role: "user", text: q });
+      input.value = "";
+      sendBtn.disabled = true;
+      var typing = addMsg("ai", "AI 思考中……");
+      try {
+        var res = await api("/api/v1/cases/" + currentCaseId + "/perspective-analysis/chat", "POST",
+                            { question: q, context: lastPerspective || {}, history: history });
+        var ans = res.answer || "（無回覆）";
+        typing.innerHTML = esc(normalizeListText(ans));
+        history.push({ role: "ai", text: ans });
+      } catch (e) {
+        typing.textContent = "討論失敗：" + e.message;
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+    sendBtn.addEventListener("click", send);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+  }
+
+  } catch (err) {
+    // 任何初始化錯誤都顯示出來，而非讓整頁失去互動
+    var t = document.getElementById("toast");
+    if (t) { t.textContent = "頁面初始化錯誤：" + err.message; t.classList.add("show"); }
+    console.error(err);
+  }
+});
+</script>
+</body>
+</html>
